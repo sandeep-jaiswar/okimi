@@ -30,6 +30,7 @@ jobs:
         key: ${{ runner.os }}-bazel-${{ hashFiles('WORKSPACE', 'MODULE.bazel') }}
         restore-keys: |
           ${{ runner.os }}-bazel-
+      continue-on-error: true
           
     - name: Build all targets
       run: bazel build //...
