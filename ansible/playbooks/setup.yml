@@ -1,0 +1,40 @@
+---
+- name: Setup Okimi Platform
+  hosts: localhost
+  become: yes
+  vars_files:
+    - ../vars/main.yml
+  
+  tasks:
+    - name: Include prerequisites
+      include_tasks: prerequisites.yml
+
+    - name: Include Bazel setup
+      include_tasks: bazel.yml
+
+    - name: Include PostgreSQL setup
+      include_tasks: postgresql.yml
+
+    - name: Include Redis setup
+      include_tasks: redis.yml
+
+    - name: Include Keycloak setup
+      include_tasks: keycloak.yml
+
+    - name: Include services setup
+      include_tasks: services.yml
+
+    - name: Include systemd setup
+      include_tasks: systemd.yml
+
+    - name: Setup development environment
+      include_tasks: development.yml
+
+    - name: Display setup summary
+      debug:
+        msg:
+          - "Okimi Platform setup complete!"
+          - "PostgreSQL: localhost:5432"
+          - "Redis: localhost:6379"
+          - "Keycloak: http://localhost:8080"
+          - "Services will be available after Bazel build"

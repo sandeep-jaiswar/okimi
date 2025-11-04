@@ -1,0 +1,31 @@
+---
+- name: Create systemd service for Auth service
+  template:
+    src: okimi-auth.service.j2
+    dest: /etc/systemd/system/okimi-auth.service
+    mode: '0644'
+
+- name: Create systemd service for User service
+  template:
+    src: okimi-user.service.j2
+    dest: /etc/systemd/system/okimi-user.service
+    mode: '0644'
+
+- name: Create systemd service for API Gateway
+  template:
+    src: okimi-gateway.service.j2
+    dest: /etc/systemd/system/okimi-gateway.service
+    mode: '0644'
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Enable services
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+  loop:
+    - okimi-auth
+    - okimi-user
+    - okimi-gateway

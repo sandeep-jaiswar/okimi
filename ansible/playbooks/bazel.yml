@@ -1,0 +1,33 @@
+---
+- name: Install Bazelisk (Bazel version manager)
+  shell: |
+    curl -LO https://github.com/bazelbuild/bazelisk/releases/download/v1.18.0/bazelisk-linux-amd64
+    chmod +x bazelisk-linux-amd64
+    mv bazelisk-linux-amd64 /usr/local/bin/bazel
+  args:
+    creates: /usr/local/bin/bazel
+
+- name: Verify Bazel installation
+  command: bazel version
+  register: bazel_version_output
+  changed_when: false
+
+- name: Display Bazel version
+  debug:
+    msg: "{{ bazel_version_output.stdout_lines }}"
+
+- name: Create Bazel cache directory
+  file:
+    path: /opt/okimi/.cache/bazel
+    state: directory
+    owner: okimi
+    group: okimi
+    mode: '0755'
+
+- name: Configure Bazel remote cache
+  template:
+    src: bazelrc.j2
+    dest: /opt/okimi/.bazelrc
+    owner: okimi
+    group: okimi
+    mode: '0644'

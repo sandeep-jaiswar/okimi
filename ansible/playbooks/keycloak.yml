@@ -1,0 +1,71 @@
+---
+- name: Create Keycloak user
+  user:
+    name: keycloak
+    shell: /sbin/nologin
+    home: /opt/keycloak
+    createhome: no
+    state: present
+
+- name: Create Keycloak directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: keycloak
+    group: keycloak
+    mode: '0755'
+  loop:
+    - /opt/keycloak
+    - /opt/keycloak/data
+    - /var/log/keycloak
+
+- name: Download Keycloak
+  get_url:
+    url: "https://github.com/keycloak/keycloak/releases/download/23.0.0/keycloak-23.0.0.tar.gz"
+    dest: /tmp/keycloak-23.0.0.tar.gz
+    checksum: "sha256:expected_checksum"
+  register: keycloak_download
+  retries: 3
+  delay: 5
+
+- name: Extract Keycloak
+  unarchive:
+    src: /tmp/keycloak-23.0.0.tar.gz
+    dest: /opt/keycloak
+    owner: keycloak
+    group: keycloak
+    extra_opts: ["--strip-components=1"]
+    remote_src: yes
+
+- name: Create Keycloak environment file
+  template:
+    src: keycloak-env.j2
+    dest: /opt/keycloak/.env
+    owner: keycloak
+    group: keycloak
+    mode: '0600'
+
+- name: Create Keycloak systemd service
+  template:
+    src: keycloak.service.j2
+    dest: /etc/systemd/system/keycloak.service
+    mode: '0644'
+
+- name: Enable and start Keycloak
+  systemd:
+    name: keycloak
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: Wait for Keycloak to start
+  pause:
+    seconds: 10
+
+- name: Verify Keycloak is running
+  uri:
+    url: "http://localhost:8080"
+    status_code: 200
+  register: keycloak_status
+  retries: 10
+  delay: 5

@@ -1,0 +1,57 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install system dependencies
+  apt:
+    name:
+      - build-essential
+      - git
+      - curl
+      - wget
+      - python3
+      - python3-pip
+      - python3-venv
+      - openjdk-17-jdk
+      - pkg-config
+      - zip
+      - unzip
+      - netcat-openbsd
+      - net-tools
+    state: present
+
+- name: Install Python packages
+  pip:
+    name:
+      - ansible
+      - requests
+      - jinja2
+      - psycopg2-binary
+      - redis
+      - atlassian-python-api
+    executable: pip3
+    state: present
+
+- name: Create okimi system user
+  user:
+    name: okimi
+    shell: /bin/bash
+    home: /opt/okimi
+    createhome: yes
+    state: present
+
+- name: Create okimi directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: okimi
+    group: okimi
+    mode: '0755'
+  loop:
+    - /opt/okimi
+    - /opt/okimi/logs
+    - /opt/okimi/data
+    - /opt/okimi/config
+    - /var/log/okimi

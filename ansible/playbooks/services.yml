@@ -1,0 +1,27 @@
+---
+- name: Build Okimi services with Bazel
+  become_user: okimi
+  shell: |
+    cd {{ okimi_home }}
+    bazel build //services/auth:auth_service
+    bazel build //services/user:user_service
+    bazel build //services/gateway:gateway_service
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    HOME: /opt/okimi
+
+- name: Create service binaries directory
+  file:
+    path: /opt/okimi/bin
+    state: directory
+    owner: okimi
+    group: okimi
+    mode: '0755'
+
+- name: Copy compiled services
+  shell: |
+    cp {{ okimi_home }}/bazel-bin/services/auth/auth_service /opt/okimi/bin/
+    cp {{ okimi_home }}/bazel-bin/services/user/user_service /opt/okimi/bin/
+    cp {{ okimi_home }}/bazel-bin/services/gateway/gateway_service /opt/okimi/bin/
+    chmod +x /opt/okimi/bin/*
+  become_user: okimi
