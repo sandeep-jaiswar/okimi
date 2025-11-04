@@ -1,0 +1,47 @@
+name: CI Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Setup Bazelisk
+      uses: bazelbuild/setup-bazelisk@v2
+      
+    - name: Mount Bazel cache
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/bazel
+        key: ${{ runner.os }}-bazel-${{ hashFiles('**/*.bazel', '**/*.bzl', 'WORKSPACE', 'MODULE.bazel') }}
+        restore-keys: |
+          ${{ runner.os }}-bazel-
+          
+    - name: Build all targets
+      run: bazel build //...
+      
+    - name: Run tests
+      run: bazel test //... --test_output=errors
+      
+    - name: Verify scripts are executable
+      run: |
+        test -x scripts/setup.sh
+        test -x scripts/start-services.sh
+        test -x scripts/stop-services.sh
+        test -x scripts/check-status.sh
+        test -x scripts/health-check.sh
+        test -x scripts/import-jira-tickets.py

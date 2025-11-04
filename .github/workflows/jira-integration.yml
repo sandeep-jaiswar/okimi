@@ -1,0 +1,43 @@
+name: Jira Integration
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+  issues:
+    types: [opened, edited]
+
+jobs:
+  link-jira:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.title, 'OKIMI-') || contains(github.event.issue.title, 'OKIMI-')
+    
+    steps:
+    - name: Extract Jira ticket
+      id: jira
+      run: |
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          TITLE="${{ github.event.pull_request.title }}"
+        else
+          TITLE="${{ github.event.issue.title }}"
+        fi
+        
+        TICKET=$(echo "$TITLE" | grep -oE 'OKIMI-[0-9]+' | head -1)
+        echo "ticket=$TICKET" >> $GITHUB_OUTPUT
+        
+    - name: Comment with Jira link
+      if: steps.jira.outputs.ticket != ''
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const ticket = '${{ steps.jira.outputs.ticket }}';
+          const jiraUrl = `https://okimi.atlassian.net/browse/${ticket}`;
+          const body = `🔗 Related Jira ticket: [${ticket}](${jiraUrl})`;
+          
+          if (context.eventName === 'pull_request') {
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+          }

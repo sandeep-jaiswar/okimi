@@ -1,0 +1,53 @@
+# Build configuration for Okimi platform
+
+# C++ compilation settings
+build --cxxopt=-std=c++20
+build --cxxopt=-Wall
+build --cxxopt=-Wextra
+build --cxxopt=-Werror
+build --host_cxxopt=-std=c++20
+
+# Java compilation settings
+build --java_language_version=17
+build --tool_java_language_version=17
+build --java_runtime_version=remotejdk_17
+
+# Optimization
+build:opt --compilation_mode=opt
+build:opt --copt=-O3
+build:opt --copt=-march=native
+
+# Debug build
+build:debug --compilation_mode=dbg
+build:debug --strip=never
+
+# Address Sanitizer
+build:asan --strip=never
+build:asan --copt=-fsanitize=address
+build:asan --copt=-DADDRESS_SANITIZER
+build:asan --copt=-O1
+build:asan --copt=-g
+build:asan --copt=-fno-omit-frame-pointer
+build:asan --linkopt=-fsanitize=address
+
+# Thread Sanitizer
+build:tsan --strip=never
+build:tsan --copt=-fsanitize=thread
+build:tsan --copt=-DTHREAD_SANITIZER
+build:tsan --copt=-O1
+build:tsan --copt=-g
+build:tsan --copt=-fno-omit-frame-pointer
+build:tsan --linkopt=-fsanitize=thread
+
+# Test configuration
+test --test_output=errors
+test --test_verbose_timeout_warnings
+
+# Remote cache (optional, configure for your setup)
+# build --remote_cache=http://localhost:9090
+
+# Disk cache
+build --disk_cache=~/.cache/bazel
+
+# Output directories
+build --symlink_prefix=bazel-
