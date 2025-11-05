@@ -1,11 +1,19 @@
 ---
 - name: Install Bazelisk (Bazel version manager)
-  shell: |
-    curl -LO https://github.com/bazelbuild/bazelisk/releases/download/v1.18.0/bazelisk-linux-amd64
-    chmod +x bazelisk-linux-amd64
-    mv bazelisk-linux-amd64 /usr/local/bin/bazel
+  vars:
+    bazelisk_version: "v1.18.0"
+    bazel_dest: "/usr/local/bin/bazel"
+  get_url:
+    url: "https://github.com/bazelbuild/bazelisk/releases/download/{{ bazelisk_version }}/bazelisk-linux-amd64"
+    dest: /tmp/bazelisk-linux-amd64
+    mode: '0755'
+  register: bazelisk_download
+
+- name: Move bazelisk to {{ bazel_dest }}
+  command: mv /tmp/bazelisk-linux-amd64 {{ bazel_dest }}
   args:
-    creates: /usr/local/bin/bazel
+    creates: "{{ bazel_dest }}"
+  notify: set-bazel-perms
 
 - name: Verify Bazel installation
   command: bazel version

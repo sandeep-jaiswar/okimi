@@ -20,22 +20,35 @@
     - /var/log/keycloak
 
 - name: Download Keycloak
+  vars:
+    keycloak_version: "{{ keycloak_version | default('23.0.3') }}"
+    keycloak_tarball: "keycloak-{{ keycloak_version }}.tar.gz"
+    keycloak_url: "https://github.com/keycloak/keycloak/releases/download/{{ keycloak_version }}/{{ keycloak_tarball }}"
   get_url:
-    url: "https://github.com/keycloak/keycloak/releases/download/23.0.0/keycloak-23.0.0.tar.gz"
-    dest: /tmp/keycloak-23.0.0.tar.gz
-    checksum: "sha256:expected_checksum"
+    url: "{{ keycloak_url }}"
+    dest: "/tmp/{{ keycloak_tarball }}"
+    mode: '0644'
+    checksum: "{{ keycloak_checksum | default(omit) }}"
+    force: no
   register: keycloak_download
   retries: 3
   delay: 5
 
+- name: Ensure Keycloak archive downloaded
+  stat:
+    path: "/tmp/{{ keycloak_tarball }}"
+  register: keycloak_archive
+
+
 - name: Extract Keycloak
   unarchive:
-    src: /tmp/keycloak-23.0.0.tar.gz
+    src: "/tmp/{{ keycloak_tarball }}"
     dest: /opt/keycloak
     owner: keycloak
     group: keycloak
     extra_opts: ["--strip-components=1"]
     remote_src: yes
+  when: keycloak_archive.stat.exists
 
 - name: Create Keycloak environment file
   template:

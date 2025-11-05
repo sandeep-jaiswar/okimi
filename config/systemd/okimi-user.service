@@ -1,0 +1,31 @@
+[Unit]
+Description=Okimi User Service
+After=network.target postgresql.service redis-server.service keycloak.service
+Wants=postgresql.service redis-server.service keycloak.service
+
+[Service]
+Type=simple
+User=okimi
+Group=okimi
+WorkingDirectory=/opt/okimi/services/user
+Environment="JAVA_OPTS=-Xmx512m -Xms256m"
+Environment="SPRING_PROFILES_ACTIVE=production"
+ExecStart=/usr/bin/java $JAVA_OPTS -jar /opt/okimi/services/user/user-service.jar
+Restart=on-failure
+RestartSec=10s
+
+# Resource limits
+MemoryMax=1G
+CPUQuota=200%
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=okimi-user
+
+[Install]
+WantedBy=multi-user.target

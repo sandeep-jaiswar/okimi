@@ -1,0 +1,67 @@
+name: CI Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        
+    - name: Setup Bazelisk
+      id: setup-bazelisk
+      uses: bazelbuild/setup-bazelisk@v3
+      with:
+        version: '1.27.0'
+
+    - name: Fallback: install bazelisk if setup action failed
+      if: steps.setup-bazelisk.conclusion != 'success'
+      run: |
+        echo "Bazelisk action failed, installing bazelisk directly (pinned v1.27.0)"
+        curl -LO https://github.com/bazelbuild/bazelisk/releases/download/v1.27.0/bazelisk-linux-amd64
+        chmod +x bazelisk-linux-amd64
+        sudo mv bazelisk-linux-amd64 /usr/local/bin/bazel
+
+    - name: Verify Bazel installation
+      run: |
+        if ! command -v bazel >/dev/null 2>&1; then
+          echo "Error: bazel not found after setup/fallback" >&2
+          exit 1
+        fi
+        bazel --version
+
+    - name: Mount Bazel cache
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/bazel
+        key: ${{ runner.os }}-bazel-${{ hashFiles('WORKSPACE', 'MODULE.bazel') }}
+        restore-keys: |
+          ${{ runner.os }}-bazel-
+      continue-on-error: true
+          
+    - name: Build all targets
+      run: bazel build //...
+      
+    - name: Run tests
+      run: bazel test //... --test_output=errors
+      
+    - name: Verify scripts are executable
+      run: |
+        test -x scripts/setup.sh
+        test -x scripts/start-services.sh
+        test -x scripts/stop-services.sh
+        test -x scripts/check-status.sh
+        test -x scripts/health-check.sh
+        test -x scripts/import-jira-tickets.py

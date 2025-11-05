@@ -1,0 +1,7 @@
+# Handlers for bazel role
+- name: set-bazel-perms
+	file:
+		path: /usr/local/bin/bazel
+		owner: root
+		group: root
+		mode: '0755'
