@@ -21,7 +21,26 @@ jobs:
         distribution: 'temurin'
         
     - name: Setup Bazelisk
-      uses: bazelbuild/setup-bazelisk@v2    
+      id: setup-bazelisk
+      uses: bazelbuild/setup-bazelisk@v3
+      with:
+        version: '1.27.0'
+
+    - name: Fallback: install bazelisk if setup action failed
+      if: steps.setup-bazelisk.conclusion != 'success'
+      run: |
+        echo "Bazelisk action failed, installing bazelisk directly (pinned v1.27.0)"
+        curl -LO https://github.com/bazelbuild/bazelisk/releases/download/v1.27.0/bazelisk-linux-amd64
+        chmod +x bazelisk-linux-amd64
+        sudo mv bazelisk-linux-amd64 /usr/local/bin/bazel
+
+    - name: Verify Bazel installation
+      run: |
+        if ! command -v bazel >/dev/null 2>&1; then
+          echo "Error: bazel not found after setup/fallback" >&2
+          exit 1
+        fi
+        bazel --version
 
     - name: Mount Bazel cache
       uses: actions/cache@v3
