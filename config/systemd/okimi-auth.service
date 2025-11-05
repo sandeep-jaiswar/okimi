@@ -1,7 +1,7 @@
 [Unit]
 Description=Okimi Auth Service
-After=network.target postgresql.service redis.service keycloak.service
-Wants=postgresql.service redis.service keycloak.service
+After=network.target postgresql.service redis-server.service keycloak.service
+Wants=postgresql.service redis-server.service keycloak.service
 
 [Service]
 Type=simple

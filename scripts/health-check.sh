@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -11,33 +13,46 @@ echo -e "${YELLOW}Okimi Services Health Check${NC}\n"
 # Exit code tracker
 exit_code=0
 
+# Ensure required tools
+missing_tools=()
+for cmd in nc curl free df uptime; do
+    if ! command -v $cmd >/dev/null 2>&1; then
+        missing_tools+=("$cmd")
+    fi
+done
+if [ ${#missing_tools[@]} -ne 0 ]; then
+    echo -e "${YELLOW}Warning: missing tools: ${missing_tools[*]}. Install them for more accurate checks.${NC}"
+fi
+
 # Service health checks
 check_service() {
     local service=$1
     local port=$2
     local endpoint=$3
-    
+
     printf "%-25s" "$service:"
-    
+
     # Check if service is running
     if ! sudo systemctl is-active --quiet "$service"; then
         echo -e "${RED}✗ Service not running${NC}"
         exit_code=1
         return
     fi
-    
+
     # Check if port is listening (if specified)
     if [ -n "$port" ]; then
-        if ! nc -z localhost "$port" 2>/dev/null; then
+        if command -v nc >/dev/null 2>&1 && nc -z localhost "$port" 2>/dev/null; then
+            :
+        else
             echo -e "${RED}✗ Port $port not listening${NC}"
             exit_code=1
             return
         fi
     fi
-    
+
     # Check HTTP endpoint (if specified)
     if [ -n "$endpoint" ]; then
-        if curl -sf "$endpoint" >/dev/null 2>&1; then
+        if command -v curl >/dev/null 2>&1 && curl -sf "$endpoint" >/dev/null 2>&1; then
             echo -e "${GREEN}✓ Healthy${NC}"
         else
             echo -e "${YELLOW}⚠ Service running but endpoint unreachable${NC}"
@@ -51,7 +66,7 @@ check_service() {
 # Database services
 echo -e "${YELLOW}Database Services:${NC}"
 check_service "postgresql" "5432"
-check_service "redis" "6379"
+check_service "redis-server" "6379"
 
 # Identity service
 echo -e "\n${YELLOW}Identity Service:${NC}"

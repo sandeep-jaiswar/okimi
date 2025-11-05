@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 # Colors
 RED='\033[0;31m'
@@ -15,22 +15,24 @@ services=(
     "okimi-user"
     "okimi-auth"
     "keycloak"
-    "redis"
+    "redis-server"
     "postgresql"
 )
 
 for service in "${services[@]}"; do
-    if sudo systemctl is-enabled "$service" >/dev/null 2>&1; then
+    # Stop only if active
+    if sudo systemctl is-active --quiet "$service"; then
         echo -n "Stopping $service... "
-        sudo systemctl stop "$service" || {
+        if sudo systemctl stop "$service"; then
+            echo -e "${GREEN}✓${NC}"
+        else
             echo -e "${RED}Failed${NC}"
             echo -e "${RED}Error stopping $service. Check logs with: journalctl -u $service${NC}"
             continue
-        }
-        echo -e "${GREEN}✓${NC}"
+        fi
     else
-        echo -e "${YELLOW}$service not enabled, skipping${NC}"
+        echo -e "${YELLOW}$service not active, skipping${NC}"
     fi
 done
 
-echo -e "\n${GREEN}All services stopped${NC}"
+echo -e "\n${GREEN}All requested services processed${NC}"

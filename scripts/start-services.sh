@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 # Colors
 GREEN='\033[0;32m'
@@ -11,7 +11,7 @@ echo -e "${YELLOW}Starting Okimi services...${NC}\n"
 
 services=(
     "postgresql"
-    "redis"
+    "redis-server"
     "keycloak"
     "okimi-auth"
     "okimi-user"
@@ -19,16 +19,22 @@ services=(
 )
 
 for service in "${services[@]}"; do
-    if sudo systemctl is-enabled "$service" >/dev/null 2>&1; then
+    # Check if the unit file exists
+    if systemctl list-unit-files --type=service --no-legend | grep -q "^${service}\.service"; then
         echo -n "Starting $service... "
-        sudo systemctl start "$service"
-        sleep 2
-        if sudo systemctl is-active --quiet "$service"; then
-            echo -e "${GREEN}✓${NC}"
+        if sudo systemctl start "$service"; then
+            sleep 2
+            if sudo systemctl is-active --quiet "$service"; then
+                echo -e "${GREEN}✓${NC}"
+            else
+                echo -e "${YELLOW}Started but not active (check logs)${NC}"
+            fi
         else
-            echo "Failed to start $service"
+            echo -e "${YELLOW}Failed to start (check logs)${NC}"
         fi
+    else
+        echo -e "${YELLOW}$service.service not found, skipping${NC}"
     fi
 done
 
-echo -e "\n${GREEN}All services started${NC}"
+echo -e "\n${GREEN}Start sequence completed${NC}"

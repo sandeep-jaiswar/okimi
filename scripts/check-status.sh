@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -10,7 +12,7 @@ echo -e "${YELLOW}Okimi Services Status${NC}\n"
 
 services=(
     "postgresql"
-    "redis"
+    "redis-server"
     "keycloak"
     "okimi-auth"
     "okimi-user"
@@ -37,10 +39,16 @@ ports=(
     "8000:API Gateway"
 )
 
+# Only use nc if available
+have_nc=0
+if command -v nc >/dev/null 2>&1; then
+    have_nc=1
+fi
+
 for port_info in "${ports[@]}"; do
     port=$(echo $port_info | cut -d: -f1)
     name=$(echo $port_info | cut -d: -f2)
-    if nc -z localhost $port 2>/dev/null; then
+    if [ $have_nc -eq 1 ] && nc -z localhost $port 2>/dev/null; then
         printf "%-20s ${GREEN}✓${NC} Listening\n" "$name:"
     else
         printf "%-20s ${RED}✗${NC} Not listening\n" "$name:"
