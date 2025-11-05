@@ -7,21 +7,21 @@ This directory contains all microservices for the Okimi platform.
 ### auth
 Authentication and authorization service.
 - **Port**: 8081
-- **Language**: Java 17
+- **Language**: Java 21
 - **Framework**: Spring Boot
 - **Build**: `bazel build //services/auth:auth_service`
 
 ### user
 User management and profile service.
 - **Port**: 8082
-- **Language**: Java 17
+- **Language**: Java 21
 - **Framework**: Spring Boot
 - **Build**: `bazel build //services/user:user_service`
 
 ### gateway
 API Gateway for routing and aggregation.
 - **Port**: 8000
-- **Language**: Java 17
+- **Language**: Java 21
 - **Framework**: Spring Cloud Gateway
 - **Build**: `bazel build //services/gateway:gateway_service`
 

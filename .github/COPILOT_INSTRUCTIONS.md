@@ -23,7 +23,7 @@ Tech Stack
 
     C++20: Latency-critical core logic (queues, memory pools, market data, etc.)
 
-    Java 17+: Business services (auth, user management, API gateway)
+    Java 21+: Business services (auth, user management, API gateway)
 
     Bazel/bzlmod: Unified build for multi-language monorepo
 

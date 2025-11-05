@@ -8,9 +8,9 @@ build --cxxopt=-Werror
 build --host_cxxopt=-std=c++20
 
 # Java compilation settings
-build --java_language_version=17
-build --tool_java_language_version=17
-build --java_runtime_version=remotejdk_17
+build --java_language_version=21
+build --tool_java_language_version=21
+build --java_runtime_version=remotejdk_21
 
 # Optimization
 build:opt --compilation_mode=opt

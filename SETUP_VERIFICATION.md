@@ -137,7 +137,7 @@ Complete Bazel configuration:
 
 2. **`.bazelrc`**: Build configuration with:
    - C++20 compilation settings
-   - Java 17 language version
+   - Java 21 language version
    - Optimization profiles (opt, debug)
    - Sanitizer profiles (asan, tsan)
    - Test configuration

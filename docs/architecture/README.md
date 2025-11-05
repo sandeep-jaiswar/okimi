@@ -52,7 +52,7 @@ Okimi is a high-performance microservices platform designed for low-latency, hig
 
 ### Auth Service
 - **Purpose**: Authentication and authorization
-- **Technology**: Java 17, Spring Boot
+- **Technology**: Java 21, Spring Boot
 - **Port**: 8081
 - **Key Features**:
   - JWT token generation and validation
@@ -62,7 +62,7 @@ Okimi is a high-performance microservices platform designed for low-latency, hig
 
 ### User Service
 - **Purpose**: User management and profile operations
-- **Technology**: Java 17, Spring Boot
+- **Technology**: Java 21, Spring Boot
 - **Port**: 8082
 - **Key Features**:
   - User CRUD operations

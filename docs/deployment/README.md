@@ -54,7 +54,7 @@ sudo apt-get install -y \
     python3 python3-pip \
     postgresql postgresql-contrib \
     redis-server \
-    openjdk-17-jdk \
+    openjdk-21-jdk \
     git curl netcat-openbsd
 ```
 

@@ -9,7 +9,7 @@ Okimi is a modern microservices platform designed for high-frequency trading and
 ## Tech Stack
 
 - **C++20**: Latency-critical core logic (queues, memory pools, market data)
-- **Java 17+**: Business services (auth, user management, API gateway)
+- **Java 21+**: Business services (auth, user management, API gateway)
 - **Bazel**: Unified build system for multi-language monorepo
 - **Systemd**: Service supervision and resource management
 - **PostgreSQL**: Relational database
